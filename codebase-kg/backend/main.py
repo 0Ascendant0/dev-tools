@@ -30,10 +30,12 @@ from api.projects import router as projects_router
 from api.graph import router as graph_router
 from api.search import router as search_router
 from api.stats import router as stats_router
+from api.extensions import router as extensions_router
 
 # Register the more specific routers first so their paths win over
 # the /{project_id} catch-all in projects_router.
 app.include_router(scan_router)
+app.include_router(extensions_router)
 app.include_router(graph_router)
 app.include_router(search_router)
 app.include_router(stats_router)

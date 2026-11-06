@@ -1,9 +1,23 @@
 """Database models and session management for Codebase Knowledge Graph."""
+
 import sqlite3
 import json
 import os
+import hashlib
 from typing import Optional, List, Dict, Any
 from pathlib import Path
+
+
+def _file_hash(path: str) -> str:
+    """Compute SHA-256 hash of a file."""
+    h = hashlib.sha256()
+    try:
+        with open(path, "rb") as f:
+            for chunk in iter(lambda: f.read(8192), b""):
+                h.update(chunk)
+        return h.hexdigest()
+    except OSError:
+        return ""
 
 
 class ProjectDB:
@@ -47,6 +61,7 @@ class ProjectDB:
                     absolute_path TEXT NOT NULL,
                     file_extension TEXT NOT NULL,
                     file_size INTEGER DEFAULT 0,
+                    file_hash TEXT DEFAULT NULL,
                     status TEXT DEFAULT 'analyzed',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -188,9 +203,10 @@ class ProjectDB:
         """Create a new source file entry (idempotent per project + path)."""
         try:
             with self._get_conn() as conn:
+                fhash = _file_hash(absolute_path)
                 conn.execute(
-                    "INSERT OR IGNORE INTO source_files (project_id, name, relative_path, absolute_path, file_extension, file_size, status) VALUES (?, ?, ?, ?, ?, ?, 'analyzed')",
-                    (project_id, name, relative_path, absolute_path, file_extension, file_size),
+                    "INSERT OR IGNORE INTO source_files (project_id, name, relative_path, absolute_path, file_extension, file_size, file_hash, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'analyzed')",
+                    (project_id, name, relative_path, absolute_path, file_extension, file_size, fhash),
                 )
                 conn.commit()
                 row = conn.execute(
@@ -381,10 +397,7 @@ class ProjectDB:
 
     # Scan history operations
     def create_scan_history(
-        self,
-        project_id: int,
-        scan_type: str = "full",
-        status: str = "pending",
+        self, project_id: int, scan_type: str = "full", status: str = "pending"
     ) -> Optional[Dict]:
         """Create a scan history entry."""
         try:

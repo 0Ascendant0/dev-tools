@@ -41,3 +41,14 @@ export const refreshProject = (projectId) =>
 
 export const deleteProject = (projectId) =>
   request(`${BASE}/${projectId}`, { method: "DELETE" });
+
+export const listExtensions = () => request(`/api/extensions/list`);
+export const getExtension = (extensionId) => request(`/api/extensions/${extensionId}`);
+export const installExtension = (extensionId) => request(`/api/extensions/${extensionId}/install`, { method: "POST" });
+export const uninstallExtension = (extensionId) => request(`/api/extensions/${extensionId}/uninstall`, { method: "POST" });
+export const enableExtension = (extensionId) => request(`/api/extensions/${extensionId}/enable`, { method: "POST" });
+export const disableExtension = (extensionId) => request(`/api/extensions/${extensionId}/disable`, { method: "POST" });
+export const checkExtensionEnabled = (extensionId) => request(`/api/extensions/${extensionId}/enabled`, { method: "GET" });
+export const checkExtensionDependencies = (extensionId) => request(`/api/extensions/${extensionId}/dependencies`, { method: "GET" });
+export const listLanguages = () => request(`/api/extensions/languages`);
+export const listInstalledExtensions = () => request(`/api/extensions`);
