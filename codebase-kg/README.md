@@ -193,4 +193,4 @@ every available extension to be active simultaneously.
 
 ## Licence
 
-MIT
+- MIT
